@@ -17,6 +17,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency "nokogiri"
+  gem.add_dependency "xml-simple"
   gem.add_dependency "json"
   gem.add_dependency "data_mapper"
   gem.add_dependency "dm-sqlite-adapter"
