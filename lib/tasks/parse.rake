@@ -89,7 +89,8 @@ end
 # All of the Models and Database stuff below here
 require 'data_mapper'
 
-DB_FILE=File.expand_path('./db/kismet_runs.db')
+DB_FILE=File.expand_path(File.dirname(__FILE__) + '/../../db/kismet_runs.db')
+binding.pry
 
 namespace :kismet do
   desc "Blow away the database and bring it inline with the current models"
