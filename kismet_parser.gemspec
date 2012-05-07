@@ -20,6 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency "json"
   gem.add_dependency "data_mapper"
   gem.add_dependency "dm-sqlite-adapter"
+  gem.add_dependency "sqlite3"
 
   gem.add_development_dependency "rspec"
 end
