@@ -180,7 +180,7 @@ class WirelessClient
   has n, :seen_clients
 end
 
-class SeenNetworks
+class SeenNetwork
   include DataMapper::Resource
 
   property :id,         Serial
@@ -191,7 +191,7 @@ class SeenNetworks
   belongs_to :wireless_network
 end
 
-class SeenClients
+class SeenClient
   include DataMapper::Resource
 
   property :id,         Serial
