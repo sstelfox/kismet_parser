@@ -2,6 +2,7 @@
 require 'nokogiri'
 require 'xmlsimple'
 require 'json'
+require 'pry'
 
 INPUT_DIR="./input"
 
@@ -21,7 +22,7 @@ namespace :kismet do
       print "Parsing file: #{file}...\t"
 
       noko.parse_file file
-      # Do something with the output:
+      # Do something with the output eventually, it's not good enough right now
       netxml_parser.detection_run
 
       print "Done\n"
@@ -33,8 +34,7 @@ namespace :kismet do
     Dir.glob(INPUT_DIR + "/**/*.netxml").each do |file|
       print "Parsing file: #{file}...\t"
 
-      # Do something with the output:
-      XmlSimple.xml_in file
+      KismetSqlBridge.process_net_data XmlSimple.xml_in file
 
       print "Done\n"
     end
@@ -49,8 +49,7 @@ namespace :kismet do
       print "Parsing file: #{file}...\t"
 
       noko.parse_file file
-      # Do something with the output:
-      gpsxml_parser.gps_points
+      KismetSqlBridge.process_gps_points gpsxml_parser.gps_points
 
       print "Done\n"
     end
@@ -60,14 +59,37 @@ end
 # For handling the conversion between the parsed hashes and the
 # database models
 class KismetSqlBridge
+  def self.process_gps_points(gps_points)
+  end
+
+  def self.process_net_data(net_data)
+    net_data["card-source"].each do |cs|
+      build_card_source(cs)
+    end
+  end
+
+  def self.build_card_source(card_source)
+    cs = CardSource.new(
+      uuid:       card_source["uuid"],
+      source:     card_source["card-source"][0],
+      name:       card_source["card-name"][0],
+      interface:  card_source["card-interface"][0],
+      type:       card_source["card-type"][0],
+      hop:        card_source["card-hop"][0] == "true",
+      channels:   channel_helper(card_source["card-channels"][0]),
+    )
+    binding.pry
+  end
+
+  def self.channel_helper(channels)
+    channels.split(',').map(&:to_i).sort.join(",")
+  end
 end
 
 # All of the Models and Database stuff below here
 require 'data_mapper'
 
 DB_FILE=File.expand_path('./db/kismet_runs.db')
-require 'pry'
-binding.pry
 
 namespace :kismet do
   desc "Blow away the database and bring it inline with the current models"
@@ -101,11 +123,13 @@ class CardSource
   property :name,       String
   property :interface,  String
   property :type,       String
-  property :packets,    Integer
   property :hop,        Boolean,  default: true 
   property :channels,   String
   property :created_at, DateTime
   property :updated_at, DateTime
+
+  has n, :seen_networks
+  has n, :seen_clients
 end
 
 class Bssid
@@ -139,7 +163,7 @@ class WirelessNetwork
   belongs_to :bssid
   has n, :client_connections
   has n, :wireless_clients, through: :client_connections
-  has 1, :card_source
+  has n, :seen_networks
 end
 
 class WirelessClient
@@ -153,7 +177,29 @@ class WirelessClient
   has n, :client_connections
   has n, :wireless_networks, through: :client_connections
   has n, :probes
-  has 1, :card_source
+  has n, :seen_clients
+end
+
+class SeenNetworks
+  include DataMapper::Resource
+
+  property :id,         Serial
+  property :created_at, DateTime
+  property :updated_at, DateTime
+
+  belongs_to :card_source
+  belongs_to :wireless_network
+end
+
+class SeenClients
+  include DataMapper::Resource
+
+  property :id,         Serial
+  property :created_at, DateTime
+  property :updated_at, DateTime
+
+  belongs_to :card_source
+  belongs_to :wireless_client
 end
 
 class ClientConnection
@@ -187,6 +233,7 @@ class GpsPoint
   property :altitude,   String, required: true
   property :signal,     Integer, required: true
   property :noise,      Integer
+  property :recorded_at,DateTime
   property :created_at, DateTime
   property :updated_at, DateTime
 
