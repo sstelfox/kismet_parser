@@ -116,6 +116,7 @@ class KismetParser::DatabaseAdapter
 
     return ssids.map do |s|
       wn = WirelessNetwork.first_or_create( {
+             bssid: s[:bssid],
              channel: s[:channel],
              encryption: s[:encryption],
              essid: s[:essid],

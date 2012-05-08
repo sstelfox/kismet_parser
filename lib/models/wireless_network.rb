@@ -5,12 +5,12 @@ class WirelessNetwork
   property :id,           Serial
 
   property :beacon_rate,  Integer
-  property :channel,      Integer,  unique_index: :ssid
+  property :channel,      Integer
   property :cloaked,      Boolean,  default: false
-  property :encryption,   String,   unique_index: :ssid
-  property :essid,        String,   unique_index: :ssid
-  property :max_rate,     String,   unique_index: :ssid
-  property :type,         String,   unique_index: :ssid
+  property :encryption,   String
+  property :essid,        String
+  property :max_rate,     String
+  property :type,         String
   
   property :created_at,   DateTime
   property :updated_at,   DateTime
