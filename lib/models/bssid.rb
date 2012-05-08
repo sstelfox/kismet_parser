@@ -13,5 +13,7 @@ class Bssid
   has n, :gps_points
   has n, :wireless_clients
   has n, :wireless_networks
+
+  has 1, :location
 end
 
