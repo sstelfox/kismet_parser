@@ -1,5 +1,5 @@
 
-class Kismet::DatabaseAdapter
+class KismetParser::DatabaseAdapter
   def self.process_gps_points(gps_points)
     gps_points.each do |gp|
       bssid = self.record_bssid gp["bssid"].downcase

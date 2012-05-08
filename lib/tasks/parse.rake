@@ -5,7 +5,7 @@ require 'fileutils'
 require 'json'
 require 'pry'
 
-INPUT_DIR="./input"
+INPUT_DIR="../kismet_logs"
 
 namespace :kismet do
   desc "Parses all .netxml and .gpsxml files in the input directory"
@@ -38,7 +38,7 @@ namespace :kismet do
     Dir.glob(INPUT_DIR + "/**/*.netxml").each do |file|
       print "Parsing file: #{file}...\t"
 
-      Kismet::DatabaseAdapter.process_net_data XmlSimple.xml_in file
+      KismetParser::DatabaseAdapter.process_net_data XmlSimple.xml_in file
 
       print "Done\n"
     end
@@ -53,7 +53,7 @@ namespace :kismet do
       print "Parsing file: #{file}...\t"
 
       noko.parse_file file
-      Kismet::DatabaseAdapter.process_gps_points gpsxml_parser.gps_points
+      KismetParser::DatabaseAdapter.process_gps_points gpsxml_parser.gps_points
 
       print "Done\n"
     end
