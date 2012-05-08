@@ -16,6 +16,7 @@ class WirelessNetwork
 
   belongs_to :bssid
 
+  has n, :card_sources, through: :seen_networks
   has n, :client_connections
   has n, :seen_networks
   has n, :wireless_clients, through: :client_connections

@@ -9,6 +9,7 @@ class WirelessClient
 
   belongs_to :bssid
 
+  has n, :card_sources, through: :seen_clients
   has n, :client_connections
   has n, :probes
   has n, :seen_clients

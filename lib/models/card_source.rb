@@ -16,6 +16,7 @@ class CardSource
   property :updated_at, DateTime
 
   has n, :seen_clients
+  has n, :seen_probes
   has n, :seen_networks
 end
 
