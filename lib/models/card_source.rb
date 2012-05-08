@@ -18,5 +18,8 @@ class CardSource
   has n, :seen_clients
   has n, :seen_probes
   has n, :seen_networks
+  has n, :wireless_clients, through: :seen_clients
+  has n, :probes, through: :seen_probes
+  has n, :wireless_networks, through: :seen_networks
 end
 

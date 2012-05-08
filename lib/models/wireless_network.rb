@@ -2,17 +2,17 @@
 class WirelessNetwork
   include DataMapper::Resource
 
-  property :id,         Serial
+  property :id,           Serial
 
-  property :beaconrate, Integer
-  property :channel,    Integer,  unique_index: :ssid
-  property :cloaked,    Boolean,  default: false
-  property :encryption, String,   unique_index: :ssid
-  property :essid,      String,   unique_index: :ssid
-  property :max_rate,   String,   unique_index: :ssid
+  property :beacon_rate,  Integer
+  property :channel,      Integer,  unique_index: :ssid
+  property :cloaked,      Boolean,  default: false
+  property :encryption,   String,   unique_index: :ssid
+  property :essid,        String,   unique_index: :ssid
+  property :max_rate,     String,   unique_index: :ssid
   
-  property :created_at, DateTime
-  property :updated_at, DateTime
+  property :created_at,   DateTime
+  property :updated_at,   DateTime
 
   belongs_to :bssid
 
