@@ -10,6 +10,7 @@ class WirelessNetwork
   property :encryption,   String,   unique_index: :ssid
   property :essid,        String,   unique_index: :ssid
   property :max_rate,     String,   unique_index: :ssid
+  property :type,         String,   unique_index: :ssid
   
   property :created_at,   DateTime
   property :updated_at,   DateTime

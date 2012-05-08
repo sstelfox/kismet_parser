@@ -121,20 +121,33 @@ class KismetSqlBridge
   def self.record_infrastructure_network(inf_network)
     bssid = self.record_bssid inf_network["BSSID"][0], inf_network["manuf"][0]
     card_source = CardSource.first( uuid: inf_network["seen-card"][0]["seen-uuid"][0] )
-    channel = inf_network["channel"][0]
     ssids = []
 
     # A single access point can broadcast multiple SSIDs, I want to record them
     # individually
-    inf_network["SSID"].each do |ssid|
+    unless inf_network["SSID"].nil?
+      inf_network["SSID"].each do |ssid|
+        ssids << {
+          beacon_rate: ssid["beaconrate"],
+          bssid: bssid,
+          channel: inf_network["channel"][0],
+          cloaked: ssid["essid"][0]["cloaked"] == "true",
+          encryption: self.encryption_helper(ssid["encryption"]),
+          essid: ssid["essid"][0]["content"],
+          max_rate: ssid["max-rate"][0],
+          type: inf_network["type"],
+        }
+      end
+    else
       ssids << {
-        beacon_rate: ssid["beaconrate"],
-        bssid: bssid,
-        channel: channel,
-        cloaked: ssid["essid"][0]["cloaked"] == "true",
-        encryption: self.encryption_helper(ssid["encryption"]),
-        essid: ssid["essid"][0]["content"],
-        max_rate: ssid["max-rate"][0],
+          beacon_rate: 0,
+          bssid: bssid,
+          channel: inf_network["channel"][0],
+          cloaked: true,
+          encryption: "Unknown", 
+          essid: "N/A",
+          max_rate: "Unknown",
+          type: inf_network["type"],
       }
     end
 
@@ -143,12 +156,13 @@ class KismetSqlBridge
       clients << self.record_wireless_client(client)
     end
 
-    ssids.map! do |s|
+    return ssids.map do |s|
       wn = WirelessNetwork.first_or_create( {
              channel: s[:channel],
              encryption: s[:encryption],
              essid: s[:essid],
-             max_rate: s[:max_rate]
+             max_rate: s[:max_rate],
+             type: s[:type],
            }, s)
 
       unless wn.card_sources.include? card_source
@@ -162,6 +176,8 @@ class KismetSqlBridge
           wn.save
         end
       end
+
+      wn
     end
   end
 
@@ -169,7 +185,13 @@ class KismetSqlBridge
     # Probes only involve one client (the one probing)
     wireless_client = self.record_wireless_client probe["wireless-client"][0]
     card_source = CardSource.first( uuid: probe["seen-card"][0]["seen-uuid"][0] )
-    essid = probe["wireless-client"][0]["SSID"][0]["ssid"][0]
+
+    # Essid's aren't always recorded
+    begin
+      essid = probe["wireless-client"][0]["SSID"][0]["ssid"][0]
+    rescue
+      essid = ""
+    end
 
     p = Probe.first_or_create( wireless_client: wireless_client, essid: essid )
 
@@ -198,7 +220,7 @@ class KismetSqlBridge
     case wireless_network["type"]
     when "probe"
       self.record_probe wireless_network
-    when "infrastructure"
+    when "infrastructure", "data"
       self.record_infrastructure_network wireless_network
     else
       binding.pry
