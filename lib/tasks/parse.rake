@@ -72,14 +72,17 @@ namespace :kismet do
   end
 end
 
-# For handling the conversion between the parsed hashes and the
-# database models
 class KismetSqlBridge
   def self.process_gps_points(gps_points)
-    # TODO:
-    # record the bssid with the gps data
-    # if the bssid and source are different
-    # also record the source with the gps data
+    gps_points.each do |gp|
+      bssid = self.record_bssid gp["bssid"].downcase
+      self.record_gps_point(bssid, gp)
+
+      unless gp["bssid"] == gp["source"]
+        bssid = self.record_bssid gp["source"].downcase
+        self.record_gps_point(bssid, gp)
+      end
+    end
   end
 
   def self.process_net_data(net_data)
@@ -100,6 +103,10 @@ class KismetSqlBridge
   def self.encryption_helper(encryption)
     return encryption.sort.join(", ")
   end
+
+  def self.time_helper(seconds, microseconds)
+    return Time.at("#{seconds}.#{microseconds}".to_i)
+  end
   
   def self.record_bssid( bssid, manufacturer = "" )
     return Bssid.first_or_create({ bssid: bssid.downcase },
@@ -116,6 +123,23 @@ class KismetSqlBridge
       hop:        card_source["card-hop"][0] == "true",
       channels:   self.channel_helper(card_source["card-channels"][0]),
     })
+  end
+
+  def self.record_gps_point(bssid, gps_data)
+    time = self.time_helper(gps_data["time-sec"], gps_data["time-usec"])
+
+    gp = GpsPoint.first_or_create({
+      altitude: gps_data["alt"],
+      bssid: bssid,
+      fix: gps_data["fix"],
+      latitude: gps_data["lat"],
+      longitude: gps_data["lon"],
+      noise: gps_data["noise_dbm"],
+      recorded_at: time,
+      signal: gps_data["signal_dbm"],
+    })
+
+    binding.pry
   end
 
   def self.record_infrastructure_network(inf_network)
