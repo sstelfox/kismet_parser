@@ -69,6 +69,15 @@ class KismetParser::DatabaseAdapter
 
   def self.record_infrastructure_network(inf_network)
     bssid = self.record_bssid inf_network["BSSID"][0], inf_network["manuf"][0]
+    
+    l = Location.first_or_create( bssid: bssid )
+    l.attributes = {
+      latitude: inf_network["gps-info"][0]["avg-lat"],
+      longitude: inf_network["gps-info"][0]["avg-lon"],
+      altitude: inf_network["gps-info"][0]["avg-alt"],
+    }
+    l.save
+
     card_source = CardSource.first( uuid: inf_network["seen-card"][0]["seen-uuid"][0] )
     ssids = []
 

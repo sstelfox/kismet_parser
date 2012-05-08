@@ -5,7 +5,7 @@ require 'fileutils'
 require 'json'
 require 'pry'
 
-INPUT_DIR="../kismet_logs"
+INPUT_DIR="./input"
 
 namespace :kismet do
   desc "Parses all .netxml and .gpsxml files in the input directory"
