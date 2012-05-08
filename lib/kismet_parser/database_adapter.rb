@@ -72,9 +72,9 @@ class KismetParser::DatabaseAdapter
     
     l = Location.first_or_create( bssid: bssid )
     l.attributes = {
-      latitude: inf_network["gps-info"][0]["avg-lat"],
-      longitude: inf_network["gps-info"][0]["avg-lon"],
-      altitude: inf_network["gps-info"][0]["avg-alt"],
+      latitude: inf_network["gps-info"][0]["avg-lat"][0],
+      longitude: inf_network["gps-info"][0]["avg-lon"][0],
+      altitude: inf_network["gps-info"][0]["avg-alt"][0],
     }
     l.save
 
