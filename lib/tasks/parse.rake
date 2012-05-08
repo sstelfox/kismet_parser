@@ -41,6 +41,10 @@ namespace :kismet do
       KismetParser::DatabaseAdapter.process_net_data XmlSimple.xml_in file
 
       print "Done\n"
+      
+      new_path = file + ".parsed"
+      FileUtils.mv(file, new_path)
+      puts "Moved file to #{new_path}"
     end
   end
 
@@ -56,6 +60,10 @@ namespace :kismet do
       KismetParser::DatabaseAdapter.process_gps_points gpsxml_parser.gps_points
 
       print "Done\n"
+      
+      new_path = file + ".parsed"
+      FileUtils.mv(file, new_path)
+      puts "Moved file to #{new_path}"
     end
   end
   
