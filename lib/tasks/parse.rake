@@ -67,7 +67,9 @@ namespace :kismet do
     DataMapper.auto_upgrade!
   end
 
-  file DB_FILE => :db_prep
+  file DB_FILE do
+    Rake::Task[:db_prep].invoke
+  end
 end
 
 # For handling the conversion between the parsed hashes and the
@@ -83,7 +85,7 @@ class KismetSqlBridge
   end
 
   def self.build_card_source(card_source)
-    cs = CardSource.new(
+    cs = CardSource.first_or_create({ uuid: card_source["uuid"]}, {
       uuid:       card_source["uuid"],
       source:     card_source["card-source"][0],
       name:       card_source["card-name"][0],
@@ -91,7 +93,7 @@ class KismetSqlBridge
       type:       card_source["card-type"][0],
       hop:        card_source["card-hop"][0] == "true",
       channels:   channel_helper(card_source["card-channels"][0]),
-    )
+    })
     binding.pry
   end
 
