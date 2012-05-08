@@ -1,6 +1,7 @@
 
 require 'nokogiri'
 require 'xmlsimple'
+require 'fileutils'
 require 'json'
 require 'pry'
 
@@ -25,6 +26,10 @@ namespace :kismet do
       netxml_parser.detection_run
 
       print "Done\n"
+
+      new_path = file + ".parsed"
+      FileUtils.mv(file, new_path)
+      puts "Moved file to #{new_path}"
     end
   end
 
