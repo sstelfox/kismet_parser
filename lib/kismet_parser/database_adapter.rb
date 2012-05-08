@@ -169,7 +169,7 @@ class KismetParser::DatabaseAdapter
     case wireless_network["type"]
     when "probe"
       self.record_probe wireless_network
-    when "infrastructure", "data"
+    when "infrastructure", "data", "ad-hoc"
       self.record_infrastructure_network wireless_network
     else
       binding.pry
