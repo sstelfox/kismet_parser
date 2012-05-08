@@ -128,7 +128,7 @@ class KismetSqlBridge
   def self.record_gps_point(bssid, gps_data)
     time = self.time_helper(gps_data["time-sec"], gps_data["time-usec"])
 
-    gp = GpsPoint.first_or_create({
+    return gp = GpsPoint.first_or_create({
       altitude: gps_data["alt"],
       bssid: bssid,
       fix: gps_data["fix"],
@@ -138,8 +138,6 @@ class KismetSqlBridge
       recorded_at: time,
       signal: gps_data["signal_dbm"],
     })
-
-    binding.pry
   end
 
   def self.record_infrastructure_network(inf_network)
