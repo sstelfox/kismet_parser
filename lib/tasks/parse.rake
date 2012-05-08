@@ -68,7 +68,7 @@ namespace :kismet do
   end
 
   file DB_FILE do
-    Rake::Task[:db_prep].invoke
+    Rake::Task["kismet:db_prep"].invoke
   end
 end
 
@@ -82,10 +82,20 @@ class KismetSqlBridge
     net_data["card-source"].each do |cs|
       build_card_source(cs)
     end
+    net_data["wireless-network"].each do |wn|
+      build_wireless_network(wn)
+      break
+    end
   end
 
+  protected
+
+  def self.channel_helper(channels)
+    channels.split(',').map(&:to_i).sort.join(",")
+  end
+  
   def self.build_card_source(card_source)
-    cs = CardSource.first_or_create({ uuid: card_source["uuid"]}, {
+    return CardSource.first_or_create({ uuid: card_source["uuid"]}, {
       uuid:       card_source["uuid"],
       source:     card_source["card-source"][0],
       name:       card_source["card-name"][0],
@@ -94,11 +104,29 @@ class KismetSqlBridge
       hop:        card_source["card-hop"][0] == "true",
       channels:   channel_helper(card_source["card-channels"][0]),
     })
-    binding.pry
   end
 
-  def self.channel_helper(channels)
-    channels.split(',').map(&:to_i).sort.join(",")
+  def self.build_wireless_network(wireless_network)
+    case wireless_network["type"]
+    when probe
+      self.record_probe(wireless_network)
+    else
+      binding.pry
+    end
   end
+
+  def self.record_bssid( bssid, manufacturer = "" )
+    return Bssid.first_or_create({ bssid: bssid.downcase },
+              { bssid: bssid.downcase, manufacturer: manufacturer })
+  end
+
+  def self.record_probe(probe)
+    bssid = record_bssid(probe["BSSID"], probe["manuf"])
+    # Probes only involve one client (the one probing)
+    wireless_client = record_wireless_client(probe["wireless-client"][0])
+    #return Probe.first_or_create({},
+    #          {})
+  end
+
 end
 
